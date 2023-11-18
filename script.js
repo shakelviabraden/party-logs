@@ -32,7 +32,9 @@ const getPartyById = async (id) => {
 
 // delete party
 const deleteParty = async (id) => {
-  // your code here
+  const response = await fetch(`${PARTIES_API_URL}/${id}`, {
+    method: "DELETE"
+  })
 };
 
 // render a single party by id
@@ -41,9 +43,13 @@ const renderSinglePartyById = async (id) => {
     // fetch party details from server
     const party = await getPartyById(id);
 
+    console.log('party', party)
+
     // GET - /api/workshop/guests/party/:partyId - get guests by party id
     const guestsResponse = await fetch(`${GUESTS_API_URL}/party/${id}`);
     const guests = await guestsResponse.json();
+
+    console.log('guests', guests)
 
     // GET - /api/workshop/rsvps/party/:partyId - get RSVPs by partyId
     const rsvpsResponse = await fetch(`${RSVPS_API_URL}/party/${id}`);
@@ -65,15 +71,15 @@ const renderSinglePartyById = async (id) => {
             <h3>Guests:</h3>
             <ul>
             ${guests
-              .map(
-                (guest, index) => `
+        .map(
+          (guest, index) => `
               <li>
                 <div>${guest.name}</div>
                 <div>${rsvps[index].status}</div>
               </li>
             `
-              )
-              .join('')}
+        )
+        .join('')}
           </ul>
           
 
@@ -92,8 +98,11 @@ const renderSinglePartyById = async (id) => {
   }
 };
 
+
 // render all parties
-const renderParties = async (parties) => {
+const renderParties = async () => {
+  const parties = await getAllParties()
+  
   try {
     partyContainer.innerHTML = '';
     parties.forEach((party) => {
@@ -113,13 +122,14 @@ const renderParties = async (parties) => {
       // see details
       const detailsButton = partyElement.querySelector('.details-button');
       detailsButton.addEventListener('click', async (event) => {
-        // your code here
+        renderSinglePartyById(party.id)
       });
 
       // delete party
       const deleteButton = partyElement.querySelector('.delete-button');
       deleteButton.addEventListener('click', async (event) => {
-        // your code here
+        deleteParty(party.id)
+        renderParties()
       });
     });
   } catch (error) {
@@ -129,7 +139,7 @@ const renderParties = async (parties) => {
 
 // init function
 const init = async () => {
-  // your code here
+  renderParties()
 };
 
 init();
